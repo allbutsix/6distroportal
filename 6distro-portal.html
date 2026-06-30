@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>6 Distro · Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0a; --panel:#111; --line:#1c1c1c; --line2:#262626;
+    --green:#22cc44; --purple:#7d6cff; --blue:#4dc8ff;
+    --txt:#fff; --dim:#888; --faint:#555;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--txt);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;min-height:100vh;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  a{color:var(--purple);}
+
+  /* ---------- LOGIN ---------- */
+  .auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
+  .auth-bg{position:absolute;inset:0;background:
+     radial-gradient(620px 320px at 18% -10%, rgba(34,204,68,.10), transparent 60%),
+     radial-gradient(560px 300px at 110% 120%, rgba(125,108,255,.12), transparent 60%);pointer-events:none;}
+  .auth-card{position:relative;width:100%;max-width:420px;background:linear-gradient(180deg,#121212,#0d0d0d);border:1px solid var(--line2);border-radius:16px;padding:38px 34px;box-shadow:0 30px 80px rgba(0,0,0,.6);}
+  .brand{display:flex;align-items:baseline;gap:10px;margin-bottom:6px;}
+  .brand .six{font-weight:800;font-size:30px;letter-spacing:-1px;}
+  .brand .six b{color:var(--green);}
+  .brand .tag{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--faint);}
+  .auth-sub{color:var(--dim);font-size:13px;line-height:1.6;margin:14px 0 26px;}
+  label.fl{display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;}
+  .inp{width:100%;background:#0a0a0a;border:1px solid var(--line2);border-radius:9px;padding:13px 14px;color:#fff;font-size:15px;font-family:inherit;outline:none;transition:border-color .15s;}
+  .inp:focus{border-color:var(--green);}
+  .btn{width:100%;margin-top:16px;padding:14px;border:none;border-radius:9px;background:var(--green);color:#04210b;font-weight:700;font-size:15px;cursor:pointer;transition:transform .05s, filter .15s;font-family:inherit;}
+  .btn:hover{filter:brightness(1.08);}
+  .btn:active{transform:translateY(1px);}
+  .btn[disabled]{opacity:.55;cursor:not-allowed;}
+  .auth-note{margin-top:20px;font-size:11.5px;color:var(--faint);line-height:1.6;text-align:center;}
+  .msg{margin-top:16px;padding:12px 14px;border-radius:9px;font-size:13px;line-height:1.5;display:none;}
+  .msg.show{display:block;}
+  .msg.ok{background:rgba(34,204,68,.08);border:1px solid rgba(34,204,68,.3);color:#9be8ad;}
+  .msg.err{background:rgba(255,80,80,.07);border:1px solid rgba(255,80,80,.3);color:#ffb3b3;}
+  .msg.info{background:rgba(77,200,255,.07);border:1px solid rgba(77,200,255,.25);color:#bfe9ff;}
+
+  /* ---------- APP SHELL ---------- */
+  .shell{display:none;min-height:100vh;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 26px;border-bottom:1px solid var(--line);position:sticky;top:0;background:rgba(10,10,10,.86);backdrop-filter:blur(10px);z-index:5;}
+  .topbar .six{font-weight:800;font-size:20px;letter-spacing:-.5px;}
+  .topbar .six b{color:var(--green);}
+  .who{display:flex;align-items:center;gap:12px;font-size:12px;color:var(--dim);}
+  .who .avatar{width:30px;height:30px;border-radius:50%;background:#1c1c1c;border:1px solid var(--line2);object-fit:cover;display:inline-block;}
+  .pill{font-size:9px;letter-spacing:1.5px;text-transform:uppercase;padding:4px 9px;border-radius:20px;border:1px solid var(--line2);color:var(--dim);}
+  .pill.admin{color:var(--purple);border-color:rgba(125,108,255,.4);}
+  .pill.ar{color:var(--blue);border-color:rgba(77,200,255,.4);}
+  .pill.artist{color:var(--green);border-color:rgba(34,204,68,.4);}
+  .lo{background:none;border:1px solid var(--line2);color:var(--dim);padding:7px 13px;border-radius:7px;font-size:11px;cursor:pointer;font-family:inherit;}
+  .lo:hover{border-color:#3a3a3a;color:#fff;}
+  .wrap{max-width:1000px;margin:0 auto;padding:34px 26px 80px;}
+
+  h1.pg{font-size:24px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px;}
+  .pg-sub{color:var(--dim);font-size:13px;margin-bottom:28px;}
+
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:28px;}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;}
+  .stat .lab{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--dim);margin-bottom:8px;}
+  .stat .val{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;}
+  .stat .val.green{color:var(--green);} .stat .val.purple{color:var(--purple);} .stat .val.blue{color:var(--blue);}
+  .stat .sub{font-size:10px;color:var(--faint);margin-top:6px;}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:22px;}
+  .card .head{padding:14px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+  .card .head .t{font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--dim);}
+  .row{padding:13px 18px;border-bottom:1px solid #161616;display:flex;justify-content:space-between;align-items:center;gap:12px;}
+  .row:last-child{border-bottom:none;}
+  .row .l{font-size:14px;font-weight:600;}
+  .row .l small{display:block;font-weight:400;color:var(--faint);font-size:11px;margin-top:2px;}
+  .row .r{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--green);}
+  .row .r.dim{color:var(--dim);}
+  .empty{padding:26px 18px;text-align:center;color:var(--faint);font-size:13px;}
+  .loading{padding:60px 0;text-align:center;color:var(--dim);font-size:13px;}
+  .spin{width:26px;height:26px;border:2px solid var(--line2);border-top-color:var(--green);border-radius:50%;margin:0 auto 14px;animation:sp 0.7s linear infinite;}
+  @keyframes sp{to{transform:rotate(360deg);}}
+
+  /* onboarding */
+  .ob-field{margin-bottom:18px;}
+  .ob-photo{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+  .ob-photo .prev{width:62px;height:62px;border-radius:50%;background:#161616;border:1px solid var(--line2);object-fit:cover;}
+  .mini{background:none;border:1px solid var(--line2);color:var(--dim);padding:8px 12px;border-radius:7px;font-size:12px;cursor:pointer;font-family:inherit;}
+  .mini:hover{border-color:#3a3a3a;color:#fff;}
+  @media(max-width:560px){ .wrap{padding:24px 16px 70px;} .auth-card{padding:30px 22px;} }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div class="auth-wrap" id="authView">
+  <div class="auth-bg"></div>
+  <div class="auth-card">
+    <div class="brand"><span class="six">6 <b>DISTRO</b></span><span class="tag">Portal</span></div>
+    <p class="auth-sub">Enter the email you were invited with. We'll send you a one-time sign-in link — no password to remember.</p>
+    <label class="fl" for="email">Email address</label>
+    <input class="inp" id="email" type="email" placeholder="you@email.com" autocomplete="email">
+    <button class="btn" id="sendLink" onclick="sendMagicLink()">Email me a sign-in link</button>
+    <div class="msg" id="authMsg"></div>
+    <p class="auth-note">Invite-only. If your email isn't recognized, ask your admin to add you.</p>
+  </div>
+</div>
+
+<!-- ===================== APP SHELL ===================== -->
+<div class="shell" id="shell">
+  <div class="topbar">
+    <span class="six">6 <b>DISTRO</b></span>
+    <div class="who">
+      <img class="avatar" id="navAvatar" alt="" style="display:none;">
+      <span id="navName"></span>
+      <span class="pill" id="navRole">—</span>
+      <button class="lo" onclick="logout()">Sign out</button>
+    </div>
+  </div>
+  <div class="wrap" id="appBody">
+    <div class="loading"><div class="spin"></div>Loading your account…</div>
+  </div>
+</div>
+
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ====== CONFIG ======
+const SUPABASE_URL = "https://jtkpelbhlekjgdioxvzl.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0a3BlbGJobGVramdkaW94dnpsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI4NTY1MTUsImV4cCI6MjA5ODQzMjUxNX0.vcRVQu4dnjLoMd7PIUpBSlzwYPaumXayqQ2x3UV71G8";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+const $ = s => document.querySelector(s);
+function money(n){ n=Number(n)||0; return '$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function showMsg(el, kind, text){ el.className='msg show '+kind; el.innerHTML=text; }
+
+// ====== AUTH ======
+async function sendMagicLink(){
+  const email = $('#email').value.trim();
+  const msg = $('#authMsg');
+  if(!email || !email.includes('@')){ showMsg(msg,'err','Enter a valid email address.'); return; }
+  const btn = $('#sendLink'); btn.disabled=true; btn.textContent='Sending…';
+  const { error } = await sb.auth.signInWithOtp({
+    email,
+    options:{ emailRedirectTo: window.location.href.split('#')[0] }
+  });
+  btn.disabled=false; btn.textContent='Email me a sign-in link';
+  if(error){ showMsg(msg,'err', esc(error.message)); return; }
+  showMsg(msg,'ok','Check your inbox — we sent a sign-in link to <b>'+esc(email)+'</b>. Open it on this device.');
+}
+
+async function logout(){ await sb.auth.signOut(); location.reload(); }
+
+// react to auth state
+sb.auth.onAuthStateChange((event, session)=>{
+  if(session && session.user){ enterApp(session.user); }
+});
+
+// on load, check existing session (handles the magic-link redirect)
+(async ()=>{
+  const { data:{ session } } = await sb.auth.getSession();
+  if(session && session.user){ enterApp(session.user); }
+})();
+
+// ====== APP ======
+async function enterApp(user){
+  $('#authView').style.display='none';
+  $('#shell').style.display='block';
+  // load my profile
+  let { data:profile, error } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  if(error || !profile){
+    $('#appBody').innerHTML = '<div class="empty">Couldn\'t load your profile. Ask your admin to confirm your account.<br><br><button class="mini" onclick="logout()">Sign out</button></div>';
+    return;
+  }
+  // top bar
+  $('#navName').textContent = profile.display_name || user.email;
+  const roleEl = $('#navRole'); roleEl.textContent = profile.role; roleEl.className = 'pill '+profile.role;
+  if(profile.photo_url){ const a=$('#navAvatar'); a.src=profile.photo_url; a.style.display='inline-block'; }
+
+  // not onboarded yet -> onboarding (artists & A&R)
+  if(!profile.onboarded && profile.role!=='admin'){ return renderOnboarding(profile, user); }
+
+  if(profile.role==='admin') return renderAdmin(profile);
+  if(profile.role==='ar')    return renderAR(profile);
+  return renderArtist(profile, user);
+}
+
+// ---------- ONBOARDING ----------
+function renderOnboarding(profile, user){
+  const isAr = profile.role==='ar';
+  $('#appBody').innerHTML = `
+    <h1 class="pg">Welcome to 6 Distro</h1>
+    <p class="pg-sub">Let's finish setting up your ${isAr?'A&R':'artist'} account.</p>
+    <div class="card"><div style="padding:20px;">
+      <div class="ob-field">
+        <label class="fl">${isAr?'Your A&R name':'Your artist name'}</label>
+        <input class="inp" id="obName" placeholder="${isAr?'e.g. Gavin Pate':'Your stage name'}" value="${esc(profile.display_name||'')}">
+        <div style="font-size:11px;color:var(--faint);margin-top:7px;">${isAr?'Used to match you to your roster.':'We\'ll match this to your catalog so your statements show up.'}</div>
+      </div>
+      <div class="ob-field">
+        <label class="fl">Legal name</label>
+        <input class="inp" id="obLegal" placeholder="First Last" value="${esc(profile.legal_name||'')}">
+      </div>
+      <div class="ob-photo">
+        <img class="prev" id="obPrev" src="${profile.photo_url||''}" alt="" onerror="this.style.visibility='hidden'">
+        <div>
+          <label class="fl">Profile photo</label>
+          <input type="file" id="obFile" accept="image/*" style="display:none" onchange="previewPhoto(event)">
+          <button class="mini" onclick="document.getElementById('obFile').click()">Choose photo</button>
+        </div>
+      </div>
+      <button class="btn" id="obSave" onclick="saveOnboarding('${user.id}', ${isAr})">Finish setup</button>
+      <div class="msg" id="obMsg"></div>
+    </div></div>`;
+}
+let _photoFile=null;
+function previewPhoto(e){
+  const f=e.target.files[0]; if(!f) return; _photoFile=f;
+  const r=new FileReader(); r.onload=()=>{ const p=$('#obPrev'); p.src=r.result; p.style.visibility='visible'; }; r.readAsDataURL(f);
+}
+async function saveOnboarding(uid, isAr){
+  const name=$('#obName').value.trim(), legal=$('#obLegal').value.trim();
+  const msg=$('#obMsg'); const btn=$('#obSave');
+  if(!name){ showMsg(msg,'err','Enter your name to continue.'); return; }
+  btn.disabled=true; btn.textContent='Saving…';
+  let photo_url=null;
+  try{
+    if(_photoFile){
+      const ext=(_photoFile.name.split('.').pop()||'jpg').toLowerCase();
+      const path=uid+'/avatar.'+ext;
+      const up=await sb.storage.from('avatars').upload(path,_photoFile,{upsert:true});
+      if(!up.error){ photo_url=sb.storage.from('avatars').getPublicUrl(path).data.publicUrl; }
+    }
+    const patch={ display_name:name, legal_name:legal, onboarded:true };
+    if(photo_url) patch.photo_url=photo_url;
+    const { error }=await sb.from('profiles').update(patch).eq('id',uid);
+    if(error){ showMsg(msg,'err',esc(error.message)); btn.disabled=false; btn.textContent='Finish setup'; return; }
+    // try to auto-link artist record by name (admin-controlled; may be blocked by RLS, that's ok)
+    location.reload();
+  }catch(err){ showMsg(msg,'err',esc(err.message||'Something went wrong.')); btn.disabled=false; btn.textContent='Finish setup'; }
+}
+
+// ---------- ARTIST VIEW ----------
+async function renderArtist(profile, user){
+  $('#appBody').innerHTML='<div class="loading"><div class="spin"></div>Loading your statements…</div>';
+  // RLS ensures we only get this artist's own rows
+  const { data:statements } = await sb.from('statements').select('*, artists!inner(name)').order('period',{ascending:false});
+  const rows = statements||[];
+  const totalPaid = rows.filter(r=>r.paid).reduce((s,r)=>s+Number(r.payout||0),0);
+  const totalOwed = rows.filter(r=>!r.paid).reduce((s,r)=>s+Number(r.payout||0),0);
+  const lifetime = rows.reduce((s,r)=>s+Number(r.payout||0),0);
+  let html = `<h1 class="pg">Your royalties</h1><p class="pg-sub">Everything paid out to you through 6 Distro.</p>
+    <div class="stats">
+      <div class="stat"><div class="lab">Lifetime earnings</div><div class="val green">${money(lifetime)}</div></div>
+      <div class="stat"><div class="lab">Paid out</div><div class="val">${money(totalPaid)}</div></div>
+      <div class="stat"><div class="lab">Pending</div><div class="val purple">${money(totalOwed)}</div></div>
+    </div>
+    <div class="card"><div class="head"><span class="t">Statements</span></div>`;
+  if(!rows.length){ html+='<div class="empty">No statements yet. They\'ll appear here once your first payout is processed.</div>'; }
+  else{
+    html+=rows.map(r=>`<div class="row"><div class="l">${esc(r.period)}<small>${esc(r.source||'')}${r.song_count?' · '+r.song_count+' songs':''}${r.paid?' · paid':' · pending'}</small></div><div class="r ${r.paid?'':'dim'}">${money(r.payout)}</div></div>`).join('');
+  }
+  html+='</div>';
+  $('#appBody').innerHTML=html;
+}
+
+// ---------- A&R VIEW ----------
+async function renderAR(profile){
+  $('#appBody').innerHTML='<div class="loading"><div class="spin"></div>Loading your roster…</div>';
+  // assignments visible to this A&R via RLS
+  const { data:assigns } = await sb.from('ar_assignments').select('commission_pct, artist_id, artists!inner(id,name)');
+  const { data:payments } = await sb.from('ar_payments').select('amount');
+  const roster = assigns||[];
+  // pull statements for assigned artists to compute value created
+  let valueByArtist={}, totalCompany=0, totalCommission=0;
+  if(roster.length){
+    const ids = roster.map(a=>a.artist_id);
+    const { data:stmts } = await sb.from('statements').select('artist_id, company_fee');
+    (stmts||[]).forEach(s=>{
+      if(ids.includes(s.artist_id)){
+        valueByArtist[s.artist_id]=(valueByArtist[s.artist_id]||0)+Number(s.company_fee||0);
+      }
+    });
+    roster.forEach(a=>{
+      const v=valueByArtist[a.artist_id]||0; totalCompany+=v;
+      totalCommission += v*(Number(a.commission_pct||0)/100);
+    });
+  }
+  const paid=(payments||[]).reduce((s,p)=>s+Number(p.amount||0),0);
+  const balance=totalCommission-paid;
+  let html=`<h1 class="pg">Your roster</h1><p class="pg-sub">The artists you've signed and what they've generated for 6 Distro.</p>
+    <div class="stats">
+      <div class="stat"><div class="lab">Artists signed</div><div class="val blue">${roster.length}</div></div>
+      <div class="stat"><div class="lab">Value created</div><div class="val purple">${money(totalCompany)}</div><div class="sub">company fee from your roster</div></div>
+      <div class="stat"><div class="lab">Commission earned</div><div class="val green">${money(totalCommission)}</div></div>
+      <div class="stat"><div class="lab">Balance owed</div><div class="val">${money(balance)}</div><div class="sub">${money(paid)} paid</div></div>
+    </div>
+    <div class="card"><div class="head"><span class="t">Your artists</span></div>`;
+  if(!roster.length){ html+='<div class="empty">No artists assigned yet.</div>'; }
+  else{
+    html+=roster.sort((a,b)=>(valueByArtist[b.artist_id]||0)-(valueByArtist[a.artist_id]||0)).map(a=>{
+      const v=valueByArtist[a.artist_id]||0; const pct=Number(a.commission_pct||0);
+      const comm=v*(pct/100);
+      const sal = pct===0;
+      return `<div class="row"><div class="l">${esc(a.artists.name)}<small>${sal?'salaried · 0% commission':pct+'% commission'}</small></div><div class="r purple">${money(v)} <span style="color:var(--faint);">value</span>${sal?'':' · <span style="color:var(--green);">'+money(comm)+'</span>'}</div></div>`;
+    }).join('');
+  }
+  html+='</div>';
+  $('#appBody').innerHTML=html;
+}
+
+// ---------- ADMIN VIEW ----------
+async function renderAdmin(profile){
+  $('#appBody').innerHTML='<div class="loading"><div class="spin"></div>Loading company data…</div>';
+  const { data:artists } = await sb.from('artists').select('id,name,fee_pct');
+  const { data:statements } = await sb.from('statements').select('artist_id,period,company_fee,payout,paid');
+  const { data:profiles } = await sb.from('profiles').select('id,role');
+  const stmts=statements||[];
+  const totalCompany=stmts.reduce((s,r)=>s+Number(r.company_fee||0),0);
+  const totalPayout=stmts.reduce((s,r)=>s+Number(r.payout||0),0);
+  const periods=[...new Set(stmts.map(s=>s.period))];
+  const counts={ artist:0, ar:0, admin:0 }; (profiles||[]).forEach(p=>counts[p.role]=(counts[p.role]||0)+1);
+  // by period
+  let byPeriod={}; stmts.forEach(s=>{ byPeriod[s.period]=(byPeriod[s.period]||0)+Number(s.company_fee||0); });
+  let html=`<h1 class="pg">Company overview</h1><p class="pg-sub">Full access. You're the admin.</p>
+    <div class="stats">
+      <div class="stat"><div class="lab">Company fee collected</div><div class="val green">${money(totalCompany)}</div></div>
+      <div class="stat"><div class="lab">Paid to artists</div><div class="val">${money(totalPayout)}</div></div>
+      <div class="stat"><div class="lab">Artists</div><div class="val purple">${(artists||[]).length}</div></div>
+      <div class="stat"><div class="lab">Accounts</div><div class="val blue">${(profiles||[]).length}</div><div class="sub">${counts.artist} artist · ${counts.ar} a&r · ${counts.admin} admin</div></div>
+    </div>
+    <div class="card"><div class="head"><span class="t">Revenue by month</span></div>`;
+  const ps=Object.keys(byPeriod);
+  if(!ps.length){ html+='<div class="empty">No statements loaded.</div>'; }
+  else{ html+=ps.map(p=>`<div class="row"><div class="l">${esc(p)}</div><div class="r green">${money(byPeriod[p])}</div></div>`).join(''); }
+  html+=`</div>
+    <div class="card"><div class="head"><span class="t">Admin tools</span></div>
+      <div class="empty" style="text-align:left;line-height:1.8;">
+        Full import / statement-running / A&R management lives in the main engine for now.<br>
+        This portal is the read + login layer. The next build connects the admin tools here so you can manage everything in one place.
+      </div></div>`;
+  $('#appBody').innerHTML=html;
+}
+</script>
+</body>
+</html>
